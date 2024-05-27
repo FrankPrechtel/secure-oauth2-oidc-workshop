@@ -17,7 +17,7 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: http://localhost:8080/realms/workshop/protocol/openid-connect/certs
-          issuer-uri: http://localhost:8080/realms/workshop/
+          issuer-uri: http://localhost:8080/realms/workshop
 
 logging:
   level:
