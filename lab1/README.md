@@ -255,20 +255,19 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfiguration {
 
-  @Override
-  protected void configure(HttpSecurity http) throws Exception {
-    http.sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
-        .cors(withDefaults())
-        .csrf()
-        .disable()
-        .authorizeRequests()
-        .anyRequest()
-        .fullyAuthenticated()
-        .and()
-        .oauth2ResourceServer()
-        .jwt();
+  @Bean
+  protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
+    http.sessionManagement(strategy -> strategy.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .cors(withDefaults())
+            .csrf(csrf -> csrf.disable())
+            .authorizeRequests()
+            .anyRequest()
+            .fullyAuthenticated()
+            .and()
+            .oauth2ResourceServer(
+                    oauth2 -> oauth2.jwt(
+                            jwt -> jwt.jwtAuthenticationConverter(libraryUserJwtAuthenticationConverter())));
+    return http.build();
   }
   
   @Bean

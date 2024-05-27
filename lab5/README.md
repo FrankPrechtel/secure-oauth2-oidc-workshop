@@ -123,7 +123,7 @@ import java.security.interfaces.RSAPublicKey;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfiguration {
 
   private final LibraryUserDetailsService libraryUserDetailsService;
   
@@ -134,20 +134,17 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     this.libraryUserDetailsService = libraryUserDetailsService;
   }
 
-  @Override
-  protected void configure(HttpSecurity http) throws Exception {
-    http.sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
-        .csrf()
-        .disable()
-        .authorizeRequests()
-        .anyRequest()
-        .fullyAuthenticated()
-        .and()
-        .oauth2ResourceServer()
-        .jwt()
-        .jwtAuthenticationConverter(libraryUserJwtAuthenticationConverter());
+
+  @Bean
+  protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
+    http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .csrf(csrf -> csrf.disable())
+            .authorizeRequests()
+            .anyRequest()
+            .fullyAuthenticated()
+            .and()
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(libraryUserJwtAuthenticationConverter())));
+    return http.build();
   }
 
   @Bean
