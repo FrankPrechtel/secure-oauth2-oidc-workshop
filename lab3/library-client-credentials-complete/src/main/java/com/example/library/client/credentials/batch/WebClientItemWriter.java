@@ -1,10 +1,8 @@
 package com.example.library.client.credentials.batch;
 
 import com.example.library.client.credentials.web.BookResource;
-import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.support.AbstractItemStreamItemWriter;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -23,7 +21,7 @@ public class WebClientItemWriter<T> extends AbstractItemStreamItemWriter<T> {
   }
 
   @Override
-  public void write(Chunk<? extends T> items) {
+  public void write(List<? extends T> items) {
     items.forEach(
             item -> webClient.post().uri(targetUrl + "/books").bodyValue(item)
                     .retrieve()
@@ -35,10 +33,10 @@ public class WebClientItemWriter<T> extends AbstractItemStreamItemWriter<T> {
                             cr -> Mono.error(new AccessDeniedException("Forbidden")))
                     .onStatus(
                             s -> s.value() == HttpStatus.BAD_REQUEST.value(),
-                            cr -> Mono.just(new IllegalArgumentException(HttpStatus.valueOf(cr.statusCode().value()).getReasonPhrase())))
+                            cr -> Mono.error(new IllegalArgumentException(cr.statusCode().getReasonPhrase())))
                     .onStatus(
-                            HttpStatusCode::is5xxServerError,
-                            cr -> Mono.error(new RuntimeException(HttpStatus.valueOf(cr.statusCode().value()).getReasonPhrase())))
+                            HttpStatus::is5xxServerError,
+                            cr -> Mono.error(new RuntimeException(cr.statusCode().getReasonPhrase())))
                     .bodyToMono(BookResource.class).log().block()
     );
   }
