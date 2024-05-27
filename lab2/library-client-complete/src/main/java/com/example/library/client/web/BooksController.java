@@ -18,6 +18,7 @@ import reactor.core.publisher.Mono;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 
 @Controller
 public class BooksController {
@@ -37,7 +38,7 @@ public class BooksController {
     model.addAttribute("fullname", oidcUser.getName());
     model.addAttribute(
         "isCurator",
-        ((JSONArray) oidcUser.getClaim("groups")).get(0).equals("library_curator"));
+        ((ArrayList) oidcUser.getClaim("groups")).get(0).equals("library_curator"));
     return webClient
         .get()
         .uri(libraryServer + "/books")
