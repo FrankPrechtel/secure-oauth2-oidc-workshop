@@ -197,7 +197,7 @@ Spring Security also validates by default:
 
 ### Step 2: Run JWT generator web application 
 
-Please navigate your Java IDE to the __lab4/jwt-generator__ project.  
+Please navigate your Java IDE to the __lab5/jwt-generator__ project.  
 Then start the application by running the class _com.example.jwt.generator.Lab5JwtGeneratorApplication_.
 
 After starting navigate your browser to [localhost:9093](http://localhost:9093).
