@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -58,7 +58,7 @@ class BookApiJwtAuthorizationTest {
     @DisplayName("get list of books")
     void verifyGetBooks() throws Exception {
 
-      mockMvc.perform(get("/books").with(jwt())).andExpect(status().isOk());
+      mockMvc.perform(get("/books").with(jwtRequestPostProcessor())).andExpect(status().isOk());
     }
 
     @Test
@@ -67,7 +67,7 @@ class BookApiJwtAuthorizationTest {
 
       mockMvc
           .perform(
-              get("/books/{bookId}", DataInitializer.BOOK_CLEAN_CODE_IDENTIFIER).with(jwt().jwt(jwt ->
+              get("/books/{bookId}", DataInitializer.BOOK_CLEAN_CODE_IDENTIFIER).with(jwtRequestPostProcessor().jwt(jwt ->
                       jwt.tokenValue("token").header("alg", "none")
                               .claim("sub", "bwayne")
                               .claim("groups", new String[] {"library_user"}))))
@@ -134,6 +134,10 @@ class BookApiJwtAuthorizationTest {
                   .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_LIBRARY_CURATOR"))))
           .andExpect(status().isOk());
     }
+  }
+
+  private static SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor jwtRequestPostProcessor() {
+    return jwt();
   }
 
   @DisplayName("cannot authorize to")
