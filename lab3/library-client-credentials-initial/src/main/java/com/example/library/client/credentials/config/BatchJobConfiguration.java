@@ -6,12 +6,8 @@ import com.example.library.client.credentials.batch.WebClientItemWriter;
 import com.example.library.client.credentials.web.BookResource;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -26,29 +22,31 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class BatchJobConfiguration {
 
+  private final JobBuilderFactory jobBuilderFactory;
+  private final StepBuilderFactory stepBuilderFactory;
   private final WebClient webClient;
 
   @Value("${library.server}")
   private String libraryServer;
 
-  public BatchJobConfiguration(WebClient webClient) {
+  public BatchJobConfiguration(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory, WebClient webClient) {
+    this.jobBuilderFactory = jobBuilderFactory;
+    this.stepBuilderFactory = stepBuilderFactory;
     this.webClient = webClient;
   }
 
   @Bean
-  public Job importBooksJob(PlatformTransactionManager transactionManager,  JobRepository jobRepository) {
-    return new JobBuilder("importBooksJob", jobRepository).preventRestart()
-                  .start(importStep(transactionManager, jobRepository))
-                  .build();
-    /*return this.jobBuilderFactory.get("importBooksJob").preventRestart()
+  public Job importBooksJob(PlatformTransactionManager transactionManager) {
+    return this.jobBuilderFactory.get("importBooksJob").preventRestart()
                   .start(importStep(transactionManager))
-                  .build();*/
+                  .build();
   }
 
   @Bean
-  public Step importStep(PlatformTransactionManager transactionManager, JobRepository jobRepository) {
-    return new StepBuilder("importStep", jobRepository)
-            .<BookResource, BookResource>chunk(10, transactionManager)
+  public Step importStep(PlatformTransactionManager transactionManager) {
+    return this.stepBuilderFactory.get("importStep")
+            .transactionManager(transactionManager)
+            .<BookResource, BookResource>chunk(10)
             .reader(itemReader())
             .writer(itemWriter())
             .startLimit(1)
