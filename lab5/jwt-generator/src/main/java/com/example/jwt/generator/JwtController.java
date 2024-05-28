@@ -53,7 +53,7 @@ public class JwtController {
     payload.put("exp", Math.abs(System.currentTimeMillis() / 1000) + (5 * 60));
     payload.put("aud", new String[] {"library-service"});
     payload.put("sub", user.getEmail() != null ? user.getEmail() : "bruce.wayne@example.com");
-    payload.put("scope", "openid email profile");
+    payload.put("scope",  user.getRole() + " email profile");
     payload.put("groups", StringUtils.isNotBlank(user.getRole()) ? new String[] {user.getRole()} : new String[] {"library_user"});
     payload.put("preferred_username", StringUtils.isNotBlank(user.getUsername()) ? user.getUsername() : "bwayne");
     payload.put("given_name", StringUtils.isNotBlank(user.getFirstName()) ? user.getFirstName() : "Bruce");
